@@ -338,114 +338,113 @@ struct ModbusRTU_struct  {
       return;
     }
 
-    /*
-       // Exception Response, see:
-       // http://digital.ni.com/public.nsf/allkb/E40CA0CFA0029B2286256A9900758E06?OpenDocument
-       String log = F("Modbus Exception - ");
-       switch (value) {
-       case MODBUS_EXCEPTION_ILLEGAL_FUNCTION: {
-        // The function code received in the query is not an allowable action for
-        // the slave.
-        // If a Poll Program Complete command was issued, this code indicates that
-        // no program function preceded it.
-        log += F("Illegal Function (not allowed by client)");
-        break;
-       }
-       case MODBUS_EXCEPTION_ILLEGAL_DATA_ADDRESS: {
-        // The data address received in the query is not an allowable address for
-        // the slave.
-        log += F("Illegal Data Address");
-        break;
-       }
-       case MODBUS_EXCEPTION_ILLEGAL_DATA_VALUE: {
-        // A value contained in the query data field is not an allowable value for
-        // the slave
-        log += F("Illegal Data Value");
-        break;
-       }
-       case MODBUS_EXCEPTION_SLAVE_OR_SERVER_FAILURE: {
-        // An unrecoverable error occurred while the slave was attempting to perform
-        // the requested action
-        log += F("Slave Device Failure");
-        break;
-       }
-       case MODBUS_EXCEPTION_ACKNOWLEDGE: {
-        // The slave has accepted the request and is processing it, but a long
-        // duration of time will be
-        // required to do so. This response is returned to prevent a timeout error
-        // from occurring in the master.
-        // The master can next issue a Poll Program Complete message to determine if
-        // processing is completed.
-        log += F("Acknowledge");
-        break; // Is this an error?
-       }
-       case MODBUS_EXCEPTION_SLAVE_OR_SERVER_BUSY: {
-        // The slave is engaged in processing a long-duration program command.
-        // The master should retransmit the message later when the slave is free.
-        log += F("Slave Device Busy");
-        break;
-       }
-       case MODBUS_EXCEPTION_NEGATIVE_ACKNOWLEDGE:
-        log += F("Negative acknowledge");
-        break;
-       case MODBUS_EXCEPTION_MEMORY_PARITY:
-        log += F("Memory parity error");
-        break;
-       case MODBUS_EXCEPTION_GATEWAY_PATH:
-        log += F("Gateway path unavailable");
-        break;
-       case MODBUS_EXCEPTION_GATEWAY_TARGET:
-        log += F("Target device failed to respond");
-        break;
-       case MODBUS_BADCRC:
-        log += F("Invalid CRC");
-        break;
-       case MODBUS_BADDATA:
-        log += F("Invalid data");
-        break;
-       case MODBUS_BADEXC:
-        log += F("Invalid exception code");
-        break;
-       case MODBUS_MDATA:
-        log += F("Too many data");
-        break;
-       case MODBUS_BADSLAVE:
-        log += F("Response not from requested slave");
-        break;
-       case MODBUS_TIMEOUT:
-        log += F("Modbus Timeout");
-        break;
-       case MODBUS_NODATA:
-        log += F("Modbus No Data");
-        break;
-       default:
-        log += String(F("Unknown Exception code: ")) + value;
-        break;
-       }
-       log += F(" - sent: ");
-       log += log_buffer(_sendframe, _sendframe_used);
-       log += F(" - received: ");
-       log += log_buffer(_recv_buf, _recv_buf_used);
-       addLog(LOG_LEVEL_DEBUG_MORE, log);
-     */
+    if (loglevelActiveFor(LOG_LEVEL_DEBUG_MORE)) {
+      // Exception Response, see:
+      // http://digital.ni.com/public.nsf/allkb/E40CA0CFA0029B2286256A9900758E06?OpenDocument
+      String log = F("Modbus Exception - ");
+      switch (value) {
+      case MODBUS_EXCEPTION_ILLEGAL_FUNCTION: {
+       // The function code received in the query is not an allowable action for
+       // the slave.
+       // If a Poll Program Complete command was issued, this code indicates that
+       // no program function preceded it.
+       log += F("Illegal Function (not allowed by client)");
+       break;
+      }
+      case MODBUS_EXCEPTION_ILLEGAL_DATA_ADDRESS: {
+       // The data address received in the query is not an allowable address for
+       // the slave.
+       log += F("Illegal Data Address");
+       break;
+      }
+      case MODBUS_EXCEPTION_ILLEGAL_DATA_VALUE: {
+       // A value contained in the query data field is not an allowable value for
+       // the slave
+       log += F("Illegal Data Value");
+       break;
+      }
+      case MODBUS_EXCEPTION_SLAVE_OR_SERVER_FAILURE: {
+       // An unrecoverable error occurred while the slave was attempting to perform
+       // the requested action
+       log += F("Slave Device Failure");
+       break;
+      }
+      case MODBUS_EXCEPTION_ACKNOWLEDGE: {
+       // The slave has accepted the request and is processing it, but a long
+       // duration of time will be
+       // required to do so. This response is returned to prevent a timeout error
+       // from occurring in the master.
+       // The master can next issue a Poll Program Complete message to determine if
+       // processing is completed.
+       log += F("Acknowledge");
+       break; // Is this an error?
+      }
+      case MODBUS_EXCEPTION_SLAVE_OR_SERVER_BUSY: {
+       // The slave is engaged in processing a long-duration program command.
+       // The master should retransmit the message later when the slave is free.
+       log += F("Slave Device Busy");
+       break;
+      }
+      case MODBUS_EXCEPTION_NEGATIVE_ACKNOWLEDGE:
+       log += F("Negative acknowledge");
+       break;
+      case MODBUS_EXCEPTION_MEMORY_PARITY:
+       log += F("Memory parity error");
+       break;
+      case MODBUS_EXCEPTION_GATEWAY_PATH:
+       log += F("Gateway path unavailable");
+       break;
+      case MODBUS_EXCEPTION_GATEWAY_TARGET:
+       log += F("Target device failed to respond");
+       break;
+      case MODBUS_BADCRC:
+       log += F("Invalid CRC");
+       break;
+      case MODBUS_BADDATA:
+       log += F("Invalid data");
+       break;
+      case MODBUS_BADEXC:
+       log += F("Invalid exception code");
+       break;
+      case MODBUS_MDATA:
+       log += F("Too many data");
+       break;
+      case MODBUS_BADSLAVE:
+       log += F("Response not from requested slave");
+       break;
+      case MODBUS_TIMEOUT:
+       log += F("Modbus Timeout");
+       break;
+      case MODBUS_NODATA:
+       log += F("Modbus No Data");
+       break;
+      default:
+       log += String(F("Unknown Exception code: ")) + value;
+       break;
+      }
+      log += F(" - sent: ");
+      log += log_buffer(_sendframe, _sendframe_used);
+      log += F(" - received: ");
+      log += log_buffer(_recv_buf, _recv_buf_used);
+      addLog(LOG_LEVEL_DEBUG_MORE, log);
+    }
   }
 
-  /*
-     String log_buffer(byte *buffer, int length) {
-      String log;
-      log.reserve(3 * length + 5);
-      for (int i = 0; i < length; ++i) {
-        String hexvalue(buffer[i], HEX);
-        hexvalue.toUpperCase();
-        log += hexvalue;
-        log += F(" ");
-      }
-      log += F("(");
-      log += length;
-      log += F(")");
-      return log;
-     }
-   */
+  String log_buffer(byte *buffer, int length) {
+    String log;
+    log.reserve(3 * length + 5);
+    for (int i = 0; i < length; ++i) {
+      String hexvalue(buffer[i], HEX);
+      hexvalue.toUpperCase();
+      log += hexvalue;
+      log += F(" ");
+    }
+    log += F("(");
+    log += length;
+    log += F(")");
+    return log;
+  }
+
   byte processCommand() {
     // CRC-calculation
     unsigned int crc =
@@ -495,7 +494,21 @@ struct ModbusRTU_struct  {
           _recv_buf[_recv_buf_used++] = easySerial->read();
         }
 
-        if (_recv_buf_used > 2) {                                         // got length
+        if (_recv_buf_used > 1 && (_recv_buf[1] & 0x80)) {   // we got an exception code
+          if (_recv_buf_used >= 5) {                         // got whole pkt
+            crc          = ModRTU_CRC(_recv_buf, _recv_buf_used);         // crc16 is 0 for whole valid pkt
+            validPacket  = (crc == 0) && (_recv_buf[0] == _sendframe[0]); // check crc and address
+            return_value =  _recv_buf[2];                                 // reset return value
+          }
+        }
+        else if (_sendframe[1] == MODBUS_WRITE_SINGLE_REGISTER) {         // for 0x6 function, slave responses with the same packet as request is
+          if (_recv_buf_used >= _sendframe_used) {                        // got whole pkt
+            crc          = ModRTU_CRC(_recv_buf, _recv_buf_used);         // crc16 is 0 for whole valid pkt
+            validPacket  = (crc == 0) && (_recv_buf[0] == _sendframe[0]); // check crc and address
+            return_value =  0;                                            // reset return value
+          }
+        }
+        else if (_recv_buf_used > 2) {                                    // got length
           if (_recv_buf_used >= (3 + _recv_buf[2] + 2)) {                 // got whole pkt
             crc          = ModRTU_CRC(_recv_buf, _recv_buf_used);         // crc16 is 0 for whole valid pkt
             validPacket  = (crc == 0) && (_recv_buf[0] == _sendframe[0]); // check crc and address
@@ -518,11 +531,6 @@ struct ModbusRTU_struct  {
         ++_reads_crc_failed;
         return_value = MODBUS_BADCRC;
       } else {
-        const byte received_functionCode = _recv_buf[1];
-
-        if ((received_functionCode & 0x80) != 0) {
-          return_value = _recv_buf[2];
-        }
         ++_reads_pass;
         _reads_nodata = 0;
       }
@@ -602,7 +610,6 @@ struct ModbusRTU_struct  {
   }
 
   int writeSingleRegister(short address, short value, byte& errorcode) {
-    // GN: Untested, will probably not work
     return process_16b_register(
       _modbus_address, MODBUS_WRITE_SINGLE_REGISTER, address, value, errorcode);
   }
@@ -691,7 +698,15 @@ struct ModbusRTU_struct  {
     errorcode = processCommand();
 
     if (errorcode == 0) {
-      return (_recv_buf[3] << 8) | (_recv_buf[4]);
+      switch (functionCode) {
+        case MODBUS_WRITE_SINGLE_REGISTER:
+          return (_recv_buf[4] << 8) | (_recv_buf[5]);
+          break;
+
+        default:
+          return (_recv_buf[3] << 8) | (_recv_buf[4]);
+          break;
+      }
     }
     logModbusException(errorcode);
     return -1;
