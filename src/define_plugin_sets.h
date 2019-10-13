@@ -723,6 +723,8 @@ To create/register a plugin, you have to :
     #define USES_P063   // TTP229_KeyPad
     #define USES_P073   // 7DG
     #define USES_P079   // Wemos Motoshield
+
+    #define USES_P224   // Brink Flair
 #endif
 
 
@@ -953,7 +955,7 @@ To create/register a plugin, you have to :
   #define USES_PACKED_RAW_DATA
 #endif
 
-#if defined(USES_P085) || defined (USES_P052) || defined(USES_P078)
+#if defined(USES_P085) || defined (USES_P052) || defined(USES_P078) || defined(USES_P224)
   #define USES_MODBUS
 #endif
 
