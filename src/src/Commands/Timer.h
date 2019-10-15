@@ -10,9 +10,9 @@ String Command_Timer_Set (struct EventStruct *event, const char* Line)
       if (event->Par2)
       {
         //start new timer
-        RulesTimer[timerId].interval = event->Par2*1000;
+        RulesTimer[timerId].interval = event->Par2;
         RulesTimer[timerId].paused = false;
-        RulesTimer[timerId].timestamp = millis() + (1000 * event->Par2);
+        RulesTimer[timerId].timestamp = millis() + (event->Par2);
       }
       else
       {

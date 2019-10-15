@@ -163,7 +163,7 @@ void preinit() {
 /*********************************************************************************************\
  * ISR call back function for handling the watchdog.
 \*********************************************************************************************/
-void sw_watchdog_callback(void *arg) 
+void sw_watchdog_callback(void *arg)
 {
   yield(); // feed the WD
   ++sw_watchdog_callback_count;
@@ -612,18 +612,18 @@ void flushAndDisconnectAllClients() {
     while (!timeOutReached(timer)) {
       // call to all controllers (delay queue) to flush all data.
       CPluginCall(CPLUGIN_FLUSH, 0);
-#ifdef USES_MQTT      
+#ifdef USES_MQTT
       if (mqttControllerEnabled && MQTTclient.connected()) {
         MQTTclient.loop();
       }
-#endif //USES_MQTT      
+#endif //USES_MQTT
     }
-#ifdef USES_MQTT    
+#ifdef USES_MQTT
     if (mqttControllerEnabled && MQTTclient.connected()) {
       MQTTclient.disconnect();
       updateMQTTclient_connected();
     }
-#endif //USES_MQTT      
+#endif //USES_MQTT
     saveToRTC();
     delay(100); // Flush anything in the network buffers.
   }
@@ -739,6 +739,8 @@ void run10TimesPerSecond() {
     PluginCall(PLUGIN_MONITOR, 0, dummy);
     STOP_TIMER(PLUGIN_CALL_10PSU);
   }
+  if (Settings.UseRules)
+    rulesTimers();
   if (Settings.UseRules && eventBuffer.length() > 0)
   {
     rulesProcessing(eventBuffer);
@@ -799,10 +801,6 @@ void runOncePerSecond()
   String dummy;
   PluginCall(PLUGIN_ONCE_A_SECOND, 0, dummy);
 //  unsigned long elapsed = micros() - start;
-
-  if (Settings.UseRules)
-    rulesTimers();
-
 
   if (SecuritySettings.Password[0] != 0)
   {
