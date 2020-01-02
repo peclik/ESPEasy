@@ -5,7 +5,6 @@
 // #######################################################################################################
 
 /*
-
    Circuit wiring
     GPIO Setting 1 -> RX
     GPIO Setting 2 -> TX
@@ -53,7 +52,8 @@
 #define P224_QUERY_STS_PREHEAT  13
 #define P224_QUERY_CUR_PREHEAT  14
 #define P224_QUERY_STS_FILTER   15
-#define P224_NR_OUTPUT_OPTIONS  16 // Must be the last one
+#define P224_QUERY_CUR_NTC_TEMP 16
+#define P224_NR_OUTPUT_OPTIONS  17 // Must be the last one
 
 #define P224_QUERY_JSON          (P224_NR_OUTPUT_OPTIONS + 1)
 
@@ -133,6 +133,7 @@ void Plugin_224_add2json(int16_t valueIdx, ArduinoJson::JsonDocument& json, floa
 
     case P224_QUERY_CUR_SUP_TEMP:
     case P224_QUERY_CUR_EXH_TEMP:
+    case P224_QUERY_CUR_NTC_TEMP:
       json[key] = value;
       break;
 
@@ -232,7 +233,6 @@ boolean Plugin_224(byte function, struct EventStruct *event, String& string) {
 
       success = true;
 
-      //todo String json(F("{"));
       ArduinoJson::DynamicJsonDocument json(512);
 
       // copy values from continuous read buffer
@@ -240,9 +240,6 @@ boolean Plugin_224(byte function, struct EventStruct *event, String& string) {
         P224_data_struct::DataBuf& dataBuf = taskData->dataBuf[i];
         if (dataBuf.success) {
           Plugin_224_add2json(i, json, dataBuf.value);
-
-          //todo json += String(F("\"")) + Plugin_224_valuename(i, false)
-          //todo   + F("\":") + Plugin_224_formatValue(i, dataBuf.value) + F(",");
         }
         else {
           success = false;
@@ -251,11 +248,7 @@ boolean Plugin_224(byte function, struct EventStruct *event, String& string) {
       }
 
       if (success) {
-        // remove last comma
-        //json.remove(json.length() - 1, 1);
-        //json += F("}");
         serializeJson(json, event->String2);
-        //sendData(event);
       }
 
       // triger new reading
@@ -458,6 +451,7 @@ boolean Plugin_X224(byte function, struct EventStruct *event, String& string, in
         p224_showValueLoadPage(P224_QUERY_STS_PREHEAT,  taskData);
         p224_showValueLoadPage(P224_QUERY_CUR_PREHEAT,  taskData);
         p224_showValueLoadPage(P224_QUERY_STS_FILTER,   taskData);
+        p224_showValueLoadPage(P224_QUERY_CUR_NTC_TEMP, taskData);
       }
 
       if (pluginId == PLUGIN_ID_225) {
@@ -606,6 +600,9 @@ boolean Plugin_X224(byte function, struct EventStruct *event, String& string, in
       if (!cmd.equalsIgnoreCase(F("BrinkFlairCMD")))
         break;
 
+      // return true, otherwise system complains in log about unknown command
+      success = true;
+
       short value = 0;
       short mbAddress = -1;
 
@@ -666,7 +663,6 @@ boolean Plugin_X224(byte function, struct EventStruct *event, String& string, in
           if (flowDataBuf.success && value == flowDataBuf.value) {
             addLog(LOG_LEVEL_DEBUG, String(F("BrinkFlair[")) + P224_DEV_ID
               + String(F("]: ")) + setting + String(F(" = ")) + value + String(F(" already set ")));
-            success = true;
             break;
           }
         }
@@ -696,7 +692,6 @@ boolean Plugin_X224(byte function, struct EventStruct *event, String& string, in
 
       addLog(LOG_LEVEL_DEBUG, String(F("BrinkFlair[")) + P224_DEV_ID
         + String(F("]: ")) + setting + String(F(" = ")) + value);
-      success = true;
 
       break;
     }
@@ -724,6 +719,7 @@ const __FlashStringHelper* Plugin_224_valuename(byte value_nr, bool longDescr) {
     case P224_QUERY_STS_PREHEAT:  return longDescr ? F("Preheater status [0-init/1-off/2-on/3-test]")          : F("PreheaterStat");
     case P224_QUERY_CUR_PREHEAT:  return longDescr ? F("Preheater power [%]")             : F("PreheaterPower");
     case P224_QUERY_STS_FILTER:   return longDescr ? F("Filter status [0-clean/1-dirty]") : F("FilterDirty");
+    case P224_QUERY_CUR_NTC_TEMP: return longDescr ? F("Current NTC1 Temp. [^C]")         : F("NTC1Temp");
   }
   return F("");
 }
@@ -755,8 +751,9 @@ bool P224_readValue2Buf(int16_t valueIdx, struct P224_data_struct *taskData) {
 
   dataBuf.success = (errorcode == 0);
 
-  if (dataBuf.success)
+  if (dataBuf.success) {
     dataBuf.value = res;
+  }
 
   return dataBuf.success;
 }
@@ -783,6 +780,7 @@ float p224_readValue(int16_t valueIdx, struct P224_data_struct *taskData, byte &
     case P224_QUERY_STS_PREHEAT:  address = 4060; break;
     case P224_QUERY_CUR_PREHEAT:  address = 4061; break;
     case P224_QUERY_STS_FILTER:   address = 4100; break;
+    case P224_QUERY_CUR_NTC_TEMP: address = 4081; divider = 10; break;
 
     default:
       errorcode = -1;
