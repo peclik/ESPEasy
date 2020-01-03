@@ -760,34 +760,44 @@ bool P224_readValue2Buf(int16_t valueIdx, struct P224_data_struct *taskData) {
 
 
 float p224_readValue(int16_t valueIdx, struct P224_data_struct *taskData, byte &errorcode) {
+  bool signedVal = false;
   float divider = 1;
   short address;
 
   switch (valueIdx) {
-    case P224_QUERY_CUR_SUP_PRES: address = 4023; break;
-    case P224_QUERY_CUR_EXH_PRES: address = 4024; break;
+    case P224_QUERY_CUR_SUP_PRES: address = 4023; signedVal = true; break;
+    case P224_QUERY_CUR_EXH_PRES: address = 4024; signedVal = true; break;
     case P224_QUERY_SET_SUP_FLOW: address = 4031; break;
     case P224_QUERY_CUR_SUP_FLOW: address = 4032; break;
     case P224_QUERY_CUR_SUP_RPM:  address = 4034; break;
-    case P224_QUERY_CUR_SUP_TEMP: address = 4036; divider = 10; break;
+    case P224_QUERY_CUR_SUP_TEMP: address = 4036; signedVal = true; divider = 10; break;
     case P224_QUERY_CUR_SUP_RH:   address = 4037; break;
     case P224_QUERY_SET_EXH_FLOW: address = 4041; break;
     case P224_QUERY_CUR_EXH_FLOW: address = 4042; break;
     case P224_QUERY_CUR_EXH_RPM:  address = 4044; break;
-    case P224_QUERY_CUR_EXH_TEMP: address = 4046, divider = 10; break;
+    case P224_QUERY_CUR_EXH_TEMP: address = 4046, signedVal = true; divider = 10; break;
     case P224_QUERY_CUR_EXH_RH:   address = 4047; break;
     case P224_QUERY_CUR_BYPASS:   address = 4050; break;
     case P224_QUERY_STS_PREHEAT:  address = 4060; break;
     case P224_QUERY_CUR_PREHEAT:  address = 4061; break;
     case P224_QUERY_STS_FILTER:   address = 4100; break;
-    case P224_QUERY_CUR_NTC_TEMP: address = 4081; divider = 10; break;
+    case P224_QUERY_CUR_NTC_TEMP: address = 4081; signedVal = true; divider = 10; break;
 
     default:
       errorcode = -1;
       return 0.0;
   }
 
-  return taskData->modbus.readInputRegister(address, errorcode) / divider;
+  int value = taskData->modbus.readInputRegister(address, errorcode);
+
+  float res;
+
+  if (signedVal)
+    res = (int16_t) value;
+  else
+    res = (uint16_t) value;
+
+  return res / divider;
 }
 
 
