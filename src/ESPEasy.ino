@@ -753,6 +753,9 @@ void run10TimesPerSecond() {
   }
 
   if (Settings.UseRules)
+    rulesTimers();
+
+  if (Settings.UseRules)
   {
     processNextEvent();
   }
@@ -811,9 +814,6 @@ void runOncePerSecond()
   String dummy;
   PluginCall(PLUGIN_ONCE_A_SECOND, 0, dummy);
 //  unsigned long elapsed = micros() - start;
-
-  if (Settings.UseRules)
-    rulesTimers();
 
 
   if (SecuritySettings.Password[0] != 0)
