@@ -18,6 +18,31 @@ byte Plugin_008_WiegandSize = 26;          // size of a tag via wiegand (26-bits
 
 boolean Plugin_008_init = false;
 
+boolean Plugin_008_checkKeyPadInput(byte bitCount, uint64_t keyBuffer, uint64_t& keyPadInput)
+{
+  if ((bitCount % 8) != 0 || ((keyBuffer & 0xFF) != 0x4B))
+    return false;
+    
+  // a number of keys were pressed and finished by #/ENT
+  // format octet: [<4bit/0xF-digit><4bit/digit>]*
+  
+  // check checksums and build result (skipping "#" octet)
+  keyPadInput = 0;
+  
+  for (byte i = bitCount / 8 - 1; i > 0 ; i--)
+  {
+    uint8_t octet = (keyBuffer >> (8*i)) & 0xFF; 
+    if (((octet >> 4) + (octet & 0x0F)) != 0x0F)
+      return false;
+      
+    keyPadInput *= 10;
+    keyPadInput += octet & 0x0F;
+  }
+  
+  return true;
+}
+
+
 boolean Plugin_008(byte function, struct EventStruct *event, String& string)
 {
   boolean success = false;
@@ -77,12 +102,24 @@ boolean Plugin_008(byte function, struct EventStruct *event, String& string)
         {
           if (Plugin_008_bitCount > 0)
           {
-            if (Plugin_008_bitCount % 4 == 0 && ((Plugin_008_keyBuffer & 0xF) == 11))
+            if (Plugin_008_bitCount % 8 == 0 && ((Plugin_008_keyBuffer & 0xFF) == 0x5A))
             {
-              // a number of keys were pressed and finished by #
-              Plugin_008_keyBuffer = Plugin_008_keyBuffer >> 4;  // Strip #
-              UserVar[event->BaseVarIndex] = (Plugin_008_keyBuffer & 0xFFFF);
-              UserVar[event->BaseVarIndex + 1] = ((Plugin_008_keyBuffer >> 16) & 0xFFFF);
+              // a number of keys were pressed and finished by ESC
+              // reset input
+              String log = F("RFID : CLR pressed - reset input");
+              addLog(LOG_LEVEL_INFO, log );
+              Plugin_008_keyBuffer = 0;
+              Plugin_008_bitCount = 0;
+              Plugin_008_timeoutCount = 0;
+              break;
+            }
+            
+            uint64_t keyPadInput;
+            if (Plugin_008_checkKeyPadInput(Plugin_008_bitCount, Plugin_008_keyBuffer, keyPadInput))
+            {
+              Plugin_008_keyBuffer = keyPadInput;
+              UserVar[event->BaseVarIndex] = (keyPadInput & 0xFFFF);
+              UserVar[event->BaseVarIndex + 1] = ((keyPadInput >> 16) & 0xFFFF);
             }
             else if (Plugin_008_bitCount == Plugin_008_WiegandSize)
             {
@@ -159,7 +196,7 @@ void Plugin_008_interrupt1()
 {
   // We've received a 1 bit. (bit 0 = high, bit 1 = low)
   Plugin_008_keyBuffer = Plugin_008_keyBuffer << 1;     // Left shift the number (effectively multiplying by 2)
-  Plugin_008_keyBuffer += 1;         // Add the 1 (not necessary for the zeroes)
+  Plugin_008_keyBuffer |= 1;     // Add the 1 (not necessary for the zeroes)
   Plugin_008_bitCount++;         // Increment the bit count
 }
 
